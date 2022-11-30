@@ -1,0 +1,59 @@
+
+
+    #####################
+    #    QUICKCONFRC    #
+    #####################
+
+
+
+# Runner command
+#export RUNNER="dmenu"
+#export RUNNER="percol"
+export RUNNER="rofi -dmenu"
+
+# Editor to use if not already defined
+if [ -z "$EDITOR" ]; then
+  export EDITOR="/usr/bin/nano"
+fi
+
+
+# Run find with editor with sudo? Required for /etc/ files
+export USE_SUDO=false
+
+# Case insensitive exclusion
+export CASE_INSENSITIVE=false
+
+
+
+
+
+# Include directories
+export ID=(
+  ~/
+)
+
+# Recursive include directories
+export RID=(
+  ~/.config
+)
+
+# Include files
+# !!! must be full path to file
+export IF=(
+)
+
+# Exclude directories
+# !!! can be any level of specificity, no leading or trailing /
+export ED=(
+)
+
+# Exclude files
+# !!! just filename, no path, no / separators)
+export EF=(
+)
+
+# Exclude words
+# !!! will match ANY path that contains WORD
+export EW=(
+  cache
+)

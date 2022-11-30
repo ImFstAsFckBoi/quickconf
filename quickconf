@@ -1,0 +1,63 @@
+#!/bin/bash
+
+CUSTOM_PATH="$HOME/.config/quickconf/quickconfrc"
+FALLBACK_PATH="/usr/share/quickconf/quickconfrc"
+
+test -f "$CONFIG_PATH"
+if ! [ $? ]
+then
+  CONFIG_PATH="$FALLBACK_PATH"
+  echo "Using global fallback config. You should make your own."
+  echo "Template file in /usr/share/quickconf/quickconfrc"
+  echo "Your own should be in ~/.config/quickconf/quickconfrc"
+else
+  CONFIG_PATH=$CUSTOM_PATH
+fi
+
+source "$CONFIG_PATH"
+
+
+function SED_ESCAPE() {
+  RES="$(echo "$1" | sed -r 's/([\$\.\*\/\[\\^])/\\\1/g; s/[]]/\[]]/g')"
+}
+
+if [ $CASE_INSENSITIVE = true ]; then CASE="I";    else CASE=""; fi
+if [ $USE_SUDO         = true ]; then SUDO="sudo"; else SUDO=""; fi
+
+
+SED_STRING=""
+
+# ED: x -> x\/
+for DIR in ${ED[@]}; do
+  SED_ESCAPE $DIR
+  SED_STRING="${SED_STRING} /${RES}\//d${CASE};"
+done
+
+# EF: x -> \/x$
+for FILE in ${EF[@]}; do
+  SED_ESCAPE $FILE
+  SED_STRING="${SED_STRING} /\/${RES}$/d${CASE};"
+done
+
+# EW: x -> x
+for WORD in ${EW[@]}; do
+  SED_ESCAPE $WORD
+  SED_STRING="${SED_STRING} /${RES}/d${CASE};"
+done
+
+
+if [ -z "$RID" ]; then RID="/dev/null"; fi
+if [ -z  "$ID" ]; then  ID="/dev/null"; fi
+
+PATH_LIST=$(($SUDO find ${RID[@]} -type f 2> /dev/null & $SUDO find ${ID[@]} -maxdepth 1 -type f 2> /dev/null) | sed "$SED_STRING")
+
+for FILE in ${IF[@]}; do
+  PATH_LIST+=$'\n'
+  PATH_LIST+="$FILE"
+done
+
+SELECTED=$(echo "$PATH_LIST" | $RUNNER)
+
+if ! [ -z "$SELECTED" ]; then
+  $SUDO $EDITOR "$SELECTED"
+fi
